@@ -1,6 +1,5 @@
 import React from 'react'
 import Helmet from 'react-helmet'
-import {injectIntl, intlShape} from 'react-intl'
 
 const bootstrap4Metas = [
     {charset: 'utf-8'},
@@ -14,11 +13,11 @@ const bootstrap4Metas = [
     }
 ]
 
-const App = (({intl: {locale, messages}}) => (
+export default (() => (
     <div>
         <Helmet
-            htmlAttributes={{ lang: locale }}
-            title={messages.appTitle}
+            htmlAttributes={{ lang: 'en' }}
+            title="Text page"
             meta={[
                    ...bootstrap4Metas
                 ]}
@@ -26,9 +25,3 @@ const App = (({intl: {locale, messages}}) => (
         </Helmet>
     </div>
 ))
-
-Footer.propTypes = {
-    intl: intlShape.isRequired
-}
-
-export default injectIntl(App)
