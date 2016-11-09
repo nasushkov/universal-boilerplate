@@ -1,6 +1,6 @@
 import Route from 'react-router/lib/Route'
-import Localizer from './localizer.jsx'
+import App from '../components/localizer.jsx'
 
 export default () => (
-    <Route path="/:locale" component={Localizer}></Route>
+    <Route path="/" component={App}></Route>
 )

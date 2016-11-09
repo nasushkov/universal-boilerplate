@@ -39,7 +39,6 @@ export default function renderRouteContext(assets) {
         log.server('Rendering routes...');
         log.server('Assets ' + JSON.stringify(assets))
         const {routeContext, store} = this
-        const localeHash = routeContext.props.params.locale + assets.javascript.app.substr(4, 21)
         const {appHtml, helmet} = renderApp(store, routeContext)
         const html = makeHtml(store.getState(), appHtml, helmet, assets)
         
