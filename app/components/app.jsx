@@ -23,5 +23,6 @@ export default (() => (
                 ]}
         >
         </Helmet>
+        Hey yo!
     </div>
 ))

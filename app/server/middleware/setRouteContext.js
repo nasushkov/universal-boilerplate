@@ -2,8 +2,6 @@ import { RouterContext, match } from 'react-router'
 import { trigger } from 'redial'
 import createMemoryHistory from 'react-router/lib/createMemoryHistory'
 
-import locData from '../../intl/locData'
-
 const log = {
     server: debug('server')
 }
@@ -23,7 +21,7 @@ export default function(makeRoutes) {
                         log.server('Redirect')
                         return reject(this.redirect(`${redirect.pathname}${redirect.search}`))
                     } else if (!renderProps) {
-                        return resolve(<p>{locData[renderProps.params['locale']].notFound}</p>)
+                        return resolve(<p>Not found</p>)
                     } else if (error) {
                         return reject(this.throw(error.message))
                     }
