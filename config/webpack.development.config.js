@@ -1,12 +1,11 @@
 const webpack = require('webpack')
 const merge = require('webpack-merge')
-const autoprefixer = require('autoprefixer')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const cssnext = require('postcss-cssnext')
+const postreporter = require('postcss-reporter')
 const path = require('path')
 
-const webpackConfig = require('./webpack.base.config')
-let {babelLoaderConfig} = require('./webpack.base.config')
-const {APP_PATH, ROOT_PATH} = require('./paths')
+const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
+const {APP_PATH} = require('./paths')
 
 babelLoaderConfig.query.plugins.push(['react-transform', {
     'transforms': [{
@@ -19,35 +18,46 @@ babelLoaderConfig.query.plugins.push(['react-transform', {
     }]
 }])
 
-module.exports = merge(webpackConfig, {
+module.exports = merge(baseConfig, {
     entry: {
         app: [
             'babel-polyfill',
-            'webpack-hot-middleware/client'
+            'webpack-hot-middleware/client',
+            APP_PATH
         ]
-    },    
-    devtool: 'cheap-module-source-map',
+    },   
+    devtool: 'source-map',
+    cache: true,
     plugins: [
+        new webpack.LoaderOptionsPlugin({
+            minimize: false,
+            options: {
+                postcss: [
+                    cssnext, postreporter()
+                ]
+            }
+        }),
         new webpack.HotModuleReplacementPlugin()
     ],
-    postcss: [
-        autoprefixer({browsers: ['last 2 versions']})
-    ],
     module: {
-        loaders: [
+        rules: [
             {
                 test: /module\.css$/,
-                loaders: [
-                    'style',
-                    'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'],
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true,
+                            importLoaders: 1,
+                            localIdentName: '[name]__[local]___[hash:base64:5]'
+                        }
+                    },
+                    'postcss-loader'
+                ],
                 include: path.join(APP_PATH, 'components')
             },
-            babelLoaderConfig,
-            {
-                test: /\.js$|\.jsx$/,
-                loader: "eslint",
-                include: [APP_PATH]
-            }
+            babelLoaderConfig
         ]
     }
 })

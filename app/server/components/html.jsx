@@ -39,6 +39,12 @@ else { f(); } })(document, window, "yandex_metrika_callbacks"); `}}
             {helmet.link.toComponent()}
             {helmet.script.toComponent()}
             {headStyles.map((style, i) =>
+                <link rel="preload" as="style" href={style} key={i}/>
+            )}
+            {bodyScripts.map((script, i) =>
+                <link rel="preload" as="script" href={script} key={i}/>
+            )}
+            {headStyles.map((style, i) =>
                 <link
                     href={style} key={i}
                     type='text/css' rel='stylesheet' media='screen'

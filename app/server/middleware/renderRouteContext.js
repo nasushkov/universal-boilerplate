@@ -4,19 +4,24 @@ import Helmet from 'react-helmet'
 import {filter, identity} from 'ramda'
 
 import Html from '../components/html.jsx'
-import {googleAnalyticsId, yaCounterId} from '../../../config/environment'
+import {BUILD_PATH, DLL_BUILD_PATH} from '../../../config/paths'
+import {googleAnalyticsId, yaCounterId, isProduction} from '../../../config/environment'
+
+const dllFilesPath = isProduction ? BUILD_PATH : DLL_BUILD_PATH
+
+const libFile = '/' + require(path.join(dllFilesPath, 'lib-manifest.json')).name + '.js'
+const reactFile = '/' + require(path.join(dllFilesPath, 'react-manifest.json')).name + '.js'
 
 const log = {
     server: debug('server')
 }
-const compact = filter(identity)
 
 const makeHtml = (initialState, appHtml, helmet, assets) => {
     return ReactDOMServer.renderToStaticMarkup(
         <Html
             initialState={initialState}
-            bodyScripts={compact([ assets.javascript.vendor, assets.javascript.app ])}
-            headStyles={compact([ assets.styles.vendor, assets.styles.app ])}
+            bodyScripts={[ libFile, reactFile, assets.javascript.app]}
+            headStyles={[ assets.styles.app ]}
             bodyHtml={`<div id="reactMain">${appHtml}</div>`}
             helmet={helmet}
             googleAnalyticsId={googleAnalyticsId}

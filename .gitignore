@@ -1,6 +1,7 @@
 /assets/webpack-assets.json
 /nvm
-/build
+/www
+/dll
 /.tmp/mocha-webpack
 node_modules
 *.log

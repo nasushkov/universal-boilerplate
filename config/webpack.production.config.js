@@ -1,40 +1,66 @@
 const webpack = require('webpack')
 const merge = require('webpack-merge')
-const autoprefixer = require('autoprefixer')
-const cssnano = require('cssnano')
+const cssnext = require('postcss-cssnext')
+const postreporter = require('postcss-reporter')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const {APP_PATH} = require('./paths')
+const {APP_PATH, BUILD_PATH, ASSETS_PATH, DLL_BUILD_PATH} = require('./paths')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const path = require('path')
 
-const webpackConfig = require('./webpack.base.config')
-const {babelLoaderConfig} = require('./webpack.base.config')
+const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
 
 babelLoaderConfig.query.plugins.push(['transform-react-constant-elements',
     'transform-react-inline-elements'])
 
-module.exports = merge(webpackConfig, {
-    devtool: null,
-    plugins: [         
-        new webpack.optimize.DedupePlugin(),
+module.exports = merge(baseConfig, {
+    devtool: false,
+    entry: {
+        app: [
+            'babel-polyfill',
+            APP_PATH
+        ]
+    },
+    output: {
+        path: BUILD_PATH,
+        publicPath: '/',
+        filename: '[name]_[hash].js'
+    },
+    plugins: [
+        new webpack.LoaderOptionsPlugin({
+            minimize: true,
+            options: {
+                postcss: [
+                    cssnext, postreporter()
+                ]
+            }
+        }),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
                 screw_ie8: true,
                 warnings: false
             }
-        })
-    ],
-    postcss: [
-        autoprefixer({browsers: ['last 2 versions']}),
-        cssnano()
+        }),
+        new CopyWebpackPlugin([{
+            from: DLL_BUILD_PATH,
+            to: BUILD_PATH
+        }])
     ],
     module: {
-        loaders: [
+        rules: [
             {
                 test: /module\.css$/,
-                loader: ExtractTextPlugin.extract('style', 'css?modules&importLoaders=1&localIdentName=[hash:base64:5]'),
+                loader: ExtractTextPlugin.extract({
+                    fallbackLoader: 'style-loader',
+                    loader: [
+                        'css-loader?modules&importLoaders=1&localIdentName=[hash:base64:5]',
+                        'postcss-loader'
+                    ]
+                }),
                 include: path.join(APP_PATH, 'components')
             },
             babelLoaderConfig
         ]
     }
 })
+
+
