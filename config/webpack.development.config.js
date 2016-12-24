@@ -7,7 +7,7 @@ const path = require('path')
 const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
 const {APP_PATH} = require('./paths')
 
-babelLoaderConfig.query.plugins.push(['react-transform', {
+babelLoaderConfig.options.plugins.push(['react-transform', {
     'transforms': [{
         'transform': 'react-transform-hmr',
         'imports': ['react'],
@@ -25,7 +25,7 @@ module.exports = merge(baseConfig, {
             'webpack-hot-middleware/client',
             APP_PATH
         ]
-    },   
+    },
     devtool: 'source-map',
     cache: true,
     plugins: [

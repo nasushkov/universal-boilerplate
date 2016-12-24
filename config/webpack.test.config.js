@@ -4,24 +4,28 @@ const nodeExternals = require('webpack-node-externals')
 const path = require('path')
 
 const {APP_PATH, SPEC_PATH} = require('./paths')
-let webpackBaseConfig = require('./webpack.base.config')
-const {babelLoaderConfig} = require('./webpack.base.config')
+const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
 
 babelLoaderConfig.include.push(SPEC_PATH)
 
-module.exports =  merge(webpackBaseConfig, {
+module.exports =  merge(baseConfig, {
+    entry: {
+        app: [APP_PATH]
+    },
     target: 'node',
     externals: [nodeExternals()],
     devtool: "cheap-module-source-map",
     module: {
-        loaders: [
+        rules: [
             {
                 test: /module\.css$/,
-                loaders: [
-                    'css/locals?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'],
+                use: [
+                    'css-loader/locals?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
+                ],
                 include: path.join(APP_PATH, 'components')
             },
             babelLoaderConfig
         ]
     }
 })
+

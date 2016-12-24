@@ -6,9 +6,9 @@ const path = require('path')
 const {IsomorphicPlugin} = require('../app/server/isomorphicTools')
 const {ROOT_PATH, APP_PATH, BUILD_PATH, DLL_BUILD_PATH} = require('./paths')
 
-module.exports = {
+module.exports.baseConfig = {
     resolve: {
-        extensions: ['', '.js', '.jsx']
+        extensions: ['.js', '.jsx']
     },
     output: {
         path: BUILD_PATH,
@@ -110,7 +110,7 @@ module.exports.babelLoaderConfig = {
     test: /\.jsx?$/,
     include: [APP_PATH],
     loader: 'babel-loader',
-    query: {
+    options: {
         cacheDirectory: true,
         presets: [['es2015', {modules: false, loose: true}], 'react', 'stage-0'],
         plugins: [

@@ -9,7 +9,7 @@ const path = require('path')
 
 const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
 
-babelLoaderConfig.query.plugins.push(['transform-react-constant-elements',
+babelLoaderConfig.options.plugins.push(['transform-react-constant-elements',
     'transform-react-inline-elements'])
 
 module.exports = merge(baseConfig, {

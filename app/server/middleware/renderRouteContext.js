@@ -2,6 +2,7 @@ import ReactDOMServer from 'react-dom/server'
 import {Provider} from 'react-redux'
 import Helmet from 'react-helmet'
 import {filter, identity} from 'ramda'
+import path from 'path'
 
 import Html from '../components/html.jsx'
 import {BUILD_PATH, DLL_BUILD_PATH} from '../../../config/paths'
