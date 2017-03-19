@@ -3,11 +3,16 @@ const merge = require('webpack-merge')
 const cssnext = require('postcss-cssnext')
 const postreporter = require('postcss-reporter')
 const path = require('path')
+const os = require('os')
+const HappyPackPlugin = require('happypack')
 
-const {babelLoaderConfig, baseConfig} = require('./webpack.base.config')
+const baseConfig = require('./webpack.base.config')
+const babelLoaderConfig = require('./partials/babelLoaderConfig')
 const {APP_PATH} = require('./paths')
 
-babelLoaderConfig.options.plugins.push(['react-transform', {
+const coreNumber = os.cpus().length
+
+babelLoaderConfig.plugins.push(['react-transform', {
     'transforms': [{
         'transform': 'react-transform-hmr',
         'imports': ['react'],
@@ -26,19 +31,8 @@ module.exports = merge(baseConfig, {
             APP_PATH
         ]
     },
-    devtool: 'source-map',
-    cache: true,
-    plugins: [
-        new webpack.LoaderOptionsPlugin({
-            minimize: false,
-            options: {
-                postcss: [
-                    cssnext, postreporter()
-                ]
-            }
-        }),
-        new webpack.HotModuleReplacementPlugin()
-    ],
+    devtool: 'cheap-eval-source-map',
+    cache: true,    
     module: {
         rules: [
             {
@@ -56,8 +50,26 @@ module.exports = merge(baseConfig, {
                     'postcss-loader'
                 ],
                 include: path.join(APP_PATH, 'components')
-            },
-            babelLoaderConfig
+            },           
         ]
-    }
+    },
+    plugins: [
+        new webpack.LoaderOptionsPlugin({
+            minimize: false,
+            options: {
+                postcss: [
+                    cssnext, postreporter()
+                ]
+            }
+        }),
+        new webpack.HotModuleReplacementPlugin(),
+        new HappyPackPlugin({
+            id: 'babel',
+            threads: coreNumber,
+            loaders: [{
+                path: 'babel-loader',
+                query: babelLoaderConfig
+            }],
+        }),
+    ]
 })

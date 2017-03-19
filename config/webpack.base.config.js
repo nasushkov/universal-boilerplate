@@ -6,7 +6,7 @@ const path = require('path')
 const {IsomorphicPlugin} = require('../app/server/isomorphicTools')
 const {ROOT_PATH, APP_PATH, BUILD_PATH, DLL_BUILD_PATH} = require('./paths')
 
-module.exports.baseConfig = {
+module.exports = {
     resolve: {
         extensions: ['.js', '.jsx']
     },
@@ -22,6 +22,11 @@ module.exports.baseConfig = {
                 enforce: "pre",
                 loader: 'eslint-loader',
                 include: APP_PATH
+            },
+            {
+                test: /\.(js|jsx)$/,
+                include: [APP_PATH],
+                loader: 'happypack/loader?id=babel'
             },
             {
                 test: /\.css$/,
@@ -102,26 +107,3 @@ module.exports.baseConfig = {
     ]
 }
 
-module.exports.babelLoaderConfig = {
-    test: /\.jsx?$/,
-    include: [APP_PATH],
-    loader: 'babel-loader',
-    options: {
-        cacheDirectory: true,
-        presets: [['es2015', {modules: false, loose: true}], 'react', 'stage-0'],
-        plugins: [
-            'add-module-exports',
-            'lodash',
-            'ramda',
-            'react-require',
-            ['provide-modules', {
-                debug: 'debug'
-            }],
-            ['transform-runtime', {
-                'polyfill': true,
-                'regenerator': true
-            }],
-            "transform-object-assign"
-        ]
-    }
-}
