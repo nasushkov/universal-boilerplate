@@ -1,24 +1,37 @@
-import Router from 'koa-router'
-
 import compose from './helpers/compose'
 import setStore from './middleware/setStore'
-import setRouteContext from './middleware/setRouteContext'
-import renderRouteContext from './middleware/renderRouteContext'
-import makeRoutes from '../containers/routes.jsx'
+import makeRenderReactApp from './middleware/renderReactApp'
+import routes from '../containers/routes.jsx'
 import apiRouter from './routes'
+import isEmpty from 'lodash/isEmpty'
 
-export const rootRouter = Router()
-
-export function setRoutes(assets) {
+export function setRoutes(assets, rootRouter) {
     rootRouter.stack.length = 0
 
-    const renderApp = compose(
+    const inlineStyles = isEmpty(assets.styles) ? Object.getOwnPropertyNames(assets.assets).map((propName) => {
+        if (propName.endsWith('.css')) {
+            return assets.assets[propName];
+        }
+    }) : []
+
+    const assetMap = {       
+        otherLinks: [],
+        headScripts: [assets.javascript.head],
+        headStyles: [assets.styles.app, assets.styles.head],
+        bodyScripts: [assets.javascript.app],
+        bodyStyles: [],
+        stringScripts: [],
+        inlineStyles,
+    }
+
+    const renderApp = makeRenderReactApp(routes, assetMap)
+
+    const processApp = compose(
         setStore,
-        setRouteContext(makeRoutes),
-        renderRouteContext(assets)
+        renderApp
     )
 
     rootRouter
         .use(apiRouter.routes())
-        .get('default', '/', renderApp)
+        .get('default', '/', processApp)
 }

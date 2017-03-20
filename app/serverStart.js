@@ -1,10 +1,13 @@
-import serve from 'koa-static';
+import serve from 'koa-static'
+import Router from 'koa-router'
 
 import {isDevelopment, PORT} from '../config/environment'
 import {ROOT_PATH, BUILD_PATH, SERVER_PATH, ASSETS_PATH, DLL_BUILD_PATH} from '../config/paths'
 import {CustomIsomorphicTools, IsomorphicPlugin} from './server/isomorphicTools'
 import app from './server/index'
 import hotReload from './helpers/hotReload'
+
+export const rootRouter = Router()
 
 if (isDevelopment) {
     CustomIsomorphicTools.development()
@@ -19,13 +22,13 @@ if (isDevelopment) {
 CustomIsomorphicTools.server(ROOT_PATH, () => {
     if (isDevelopment) {
         app.use(function *() {
-            const {rootRouter, setRoutes} = require(`${SERVER_PATH}/router`)
-            setRoutes(CustomIsomorphicTools.assets())
+            const {setRoutes} = require(`${SERVER_PATH}/router`)
+            setRoutes(CustomIsomorphicTools.assets(), rootRouter)
             yield rootRouter.routes()
         })
     } else {
-        const {rootRouter, setRoutes} = require(`${SERVER_PATH}/router`)
-        setRoutes(CustomIsomorphicTools.assets())
+        const {setRoutes} = require(`${SERVER_PATH}/router`)
+        setRoutes(CustomIsomorphicTools.assets(), rootRouter)
         app.use(rootRouter.routes())
     }
 })

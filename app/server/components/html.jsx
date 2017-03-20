@@ -1,79 +1,102 @@
-import React, {PropTypes} from 'react'
-import {isProduction} from '../../../config/environment'
+import React from 'react'
+import Helmet from 'react-helmet'
 
-const HtmlComponent = ({initialState, headStyles, helmet, bodyScripts, bodyHtml, googleAnalyticsId, yaCounterId}) => {
-    const googleAnalytics = isProduction && googleAnalyticsId !== 'UA-XXXXXXX-X' &&
-        <script
-            dangerouslySetInnerHTML={{ __html: `
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-ga('create', '${googleAnalyticsId}', 'auto'); ga('send', 'pageview');` }}
-        />;
+const {PropTypes} = React
 
-    const yaCounter = isProduction && yaCounterId !== '00000000' &&
-            <script
-                dangerouslySetInnerHTML={{ __html: `
-(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter${yaCounterId} = new Ya.Metrika({
-id:${yaCounterId}, clickmap:true, trackLinks:true, accurateTrackBounce:true }); } catch(e) { } });
-var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () {
-n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js";
-if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); }
-else { f(); } })(document, window, "yandex_metrika_callbacks"); `}}
-            />
+class Html extends React.Component {
+    static propTypes = {
+        bodyHtml: PropTypes.string,
+        headScripts: PropTypes.array,
+        stringScripts: PropTypes.array,
+        bodyScripts: PropTypes.array,
+        headStyles: PropTypes.array,
+        bodyStyles: PropTypes.array,
+        otherLinks: PropTypes.array,
+        inlineStyles: PropTypes.array,
+    }
 
-    const yaCounterNoScript = isProduction && yaCounterId !== '00000000' &&
-        <noscript>
-            <div>
-                <img src={`https://mc.yandex.ru/watch/${yaCounterId}`} styles="position:absolute; left:-9999px;" alt="" />
-            </div>
-        </noscript>
+    getHelmetMetaData() {
+        const head = Helmet.rewind()
+        return {
+            helmetHtmlAttributes: head.htmlAttributes.toComponent(),
+            helmetTitle: head.title.toComponent(),
+            helmetMeta: head.meta.toComponent(),
+            helmetBase: head.base.toComponent(),
+            helmetLink: head.link.toComponent(),
+            helmetScript: head.script.toComponent(),
+        }
+    }
 
-    return (
-        <html {...helmet.htmlAttributes.toComponent()}>
-        <head>
-            {helmet.title.toComponent()}
-            {helmet.base.toComponent()}
-            {helmet.meta.toComponent()}
-            {helmet.link.toComponent()}
-            {helmet.script.toComponent()}
-            {headStyles.map((style, i) =>
-                <link rel="preload" as="style" href={style} key={i}/>
-            )}
+    render() {
+        const {
+            bodyHtml,
+            otherLinks,
+            stringScripts,
+            headStyles,
+            headScripts,
+            bodyScripts,
+            bodyStyles,
+            inlineStyles,
+        } = this.props
+
+        const {
+            helmetHtmlAttributes,
+            helmetTitle,
+            helmetMeta,
+            helmetBase,
+            helmetLink,
+            helmetScript
+        } = this.getHelmetMetaData()
+
+        return (
+            <html {...helmetHtmlAttributes}>
+            <head>
+                {helmetTitle}
+                {helmetBase}
+                {helmetMeta}
+                {helmetLink}
+                {otherLinks.map((props, i) =>
+                    <link key={i} {...props} />
+                )}
+                {headStyles.map((style, i) =>
+                    <link
+                        key={i}
+                        href={style}
+                        type='text/css' rel='stylesheet' media='screen'
+                    />
+                )}
+                {helmetScript}
+                {headScripts.map((script, i) =>
+                    <script src={script} key={i}/>
+                )}
+                {stringScripts.map((script, i) =>
+                    <script key={i} dangerouslySetInnerHTML={{
+            __html: script,
+          }}/>
+                )}
+                {inlineStyles.map((st, i) =>
+                    <style dangerouslySetInnerHTML={{__html: st}}/>
+                )}
+            </head>
+            <body>
+            <div id="reactMain" dangerouslySetInnerHTML={{__html: bodyHtml}}/>
             {bodyScripts.map((script, i) =>
-                <link rel="preload" as="script" href={script} key={i}/>
+                <script key={i} src={script}/>
             )}
-            {headStyles.map((style, i) =>
-                <link
-                    href={style} key={i}
-                    type='text/css' rel='stylesheet' media='screen'
-                />
+            {bodyStyles.map((style, i) =>
+                <script key={i} dangerouslySetInnerHTML={{
+          __html: `loadCSS('${style}')`,
+        }}/>
             )}
-            <script
-                dangerouslySetInnerHTML={{
-              __html: `window.__INITIAL_STATE__ = ${
-                JSON.stringify(initialState, null, 2)
-              };`,
-            }}
-            ></script>
-            {googleAnalytics}
-            {yaCounter}
-        </head>
-        <body>
-        <div id="reactMain" dangerouslySetInnerHTML={{ __html: bodyHtml }}/>
-        {bodyScripts.map((script, i) =>
-            <script src={script} key={i}/>
-        )}
-        {yaCounterNoScript}
-        </body>
-        </html>
-    )
+            {bodyStyles.map((style, i) =>
+                <noscript key={i} dangerouslySetInnerHTML={{
+          __html: `<link href="${style}" rel="stylesheet" />`,
+        }}/>
+            )}
+            </body>
+            </html>
+        )
+    }
 }
 
-HtmlComponent.propTypes = {
-    bodyHtml: PropTypes.string.isRequired,
-    helmet: PropTypes.object.isRequired
-}
-
-export default HtmlComponent
+export default Html

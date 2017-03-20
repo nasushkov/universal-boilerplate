@@ -21,6 +21,9 @@ babelLoaderConfig.plugins.push(['transform-react-constant-elements',
 module.exports = merge(baseConfig, {
     devtool: false,
     entry: {
+        head: [
+            path.join(APP_PATH, 'utils', 'loadCss.js'),
+        ],
         app: [
             'babel-polyfill',
             APP_PATH
