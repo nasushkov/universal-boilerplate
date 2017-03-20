@@ -26,7 +26,7 @@ babelLoaderConfig.plugins.push(['react-transform', {
 module.exports = merge(baseConfig, {
     entry: {
         head: [
-            path.join(APP_PATH, 'utils', 'loadCss.js'),
+            path.join(APP_PATH, 'utils', 'loadCssAsync.js'),
         ],
         app: [
             'babel-polyfill',
